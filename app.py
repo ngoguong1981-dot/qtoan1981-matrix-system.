@@ -18,9 +18,9 @@ uploaded_file = st.file_uploader("Đưa đề thi gốc vào đây (định dạ
 
 if st.button("Khởi tạo Trọn Bộ (5 Hạng Mục)"):
     if not api_key:
-        st.warning("⚠️ Thầy ơi, hãy nhập API Key vào ô trống ở thanh bên trái (Sidebar) trước khi bấm khởi tạo nhé!")
+        st.warning("AQ.Ab8RN6KmH5A9UPAKdDGYuPr2A_Boyz1fF0eEVZInYhgGFBfYHA")
     elif not uploaded_file:
-        st.warning("⚠️ Thầy chưa tải file đề thi lên!")
+        st.warning("AQ.Ab8RN6KmH5A9UPAKdDGYuPr2A_Boyz1fF0eEVZInYhgGFBfYHA")
     else:
         genai.configure(api_key=api_key)
         
@@ -43,7 +43,7 @@ if st.button("Khởi tạo Trọn Bộ (5 Hạng Mục)"):
         - Mọi bảng biến thiên, bảng xét dấu, đồ thị hàm số và hình vẽ hình học (phẳng & không gian) BẮT BUỘC phải viết bằng mã TikZ (kết hợp tkz-tab, tkz-euclide, pgfplots). Bọc mã trong môi trường \\begin{{tikzpicture}} ... \\end{{tikzpicture}}.
         """
         
-        model = genai.GenerativeModel(model_name='gemini-1.5-flash', system_instruction=system_instruction)
+        model = genai.GenerativeModel(model_name='gemini-2.5-flash', system_instruction=system_instruction)
         
         with st.spinner("Hệ thống QTOAN đang xử lý, phân tích mã năng lực và vẽ TikZ... Vui lòng đợi..."):
             if uploaded_file.name.endswith(".txt"):
