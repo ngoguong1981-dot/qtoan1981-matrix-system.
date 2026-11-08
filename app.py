@@ -11,7 +11,7 @@ with st.sidebar:
     
     # ⚠️ Đã sửa: Lấy API Key an toàn từ Streamlit Secrets để tránh lỗi 403 Leaked Key
     try:
-        api_key = st.secrets["model = genai.GenerativeModel(model_name='gemini-1.5-pro-002', system_instruction=system_instruction)"]
+        api_key ="AIzaSyCdZiVOLXn9s0S30PkCE_CYS45PLV28F6s"
     except KeyError:
         api_key = ""
         st.error("Chưa cấu hình GEMINI_API_KEY trong mục Secrets của Streamlit Cloud.")
