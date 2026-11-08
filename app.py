@@ -18,9 +18,9 @@ uploaded_file = st.file_uploader("Đưa đề thi gốc vào đây (định dạ
 
 if st.button("Khởi tạo Trọn Bộ (5 Hạng Mục)"):
     if not api_key:
-        st.warning("AQ.Ab8RN6KmH5A9UPAKdDGYuPr2A_Boyz1fF0eEVZInYhgGFBfYHA")
+        st.warning("AQ.Ab8RN6Li-R8pvQ9s9hwFcZEHXEKG1PsV7zjJaDlZceDPCTrzRg")
     elif not uploaded_file:
-        st.warning("AQ.Ab8RN6KmH5A9UPAKdDGYuPr2A_Boyz1fF0eEVZInYhgGFBfYHA")
+        st.warning("AQ.Ab8RN6Li-R8pvQ9s9hwFcZEHXEKG1PsV7zjJaDlZceDPCTrzRg")
     else:
         genai.configure(api_key=api_key)
         
