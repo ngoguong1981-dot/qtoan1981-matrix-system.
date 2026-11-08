@@ -8,7 +8,7 @@ st.title("Hệ thống Tự động Phân tích Đề & Lập Ma Trận Toán H�
 
 with st.sidebar:
     st.header("Cấu hình hệ thống")
-    api_key = st.text_input("Nhập Google Gemini API Key:", type="password")
+    api_key = "AIzaSyCjGcynucVLaoxQeTyBj1ZEKFYAKUCSrvM"
     khoi_lop = st.radio("Chọn khối lớp:", ["Khối 6, 7, 8, 9, 10, 11", "Khối 12"])
     st.markdown("---")
     st.info("Định dạng bắt buộc:\n- Công thức: `$ ... $`\n- Hình vẽ: `TikZ`")
