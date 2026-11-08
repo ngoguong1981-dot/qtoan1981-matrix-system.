@@ -37,7 +37,7 @@ if st.button("Khởi tạo Trọn Bộ (5 Hạng Mục)") and uploaded_file and 
     - Mọi bảng biến thiên, bảng xét dấu, đồ thị hàm số và hình vẽ hình học (phẳng & không gian) BẮT BUỘC phải viết bằng mã TikZ (kết hợp tkz-tab, tkz-euclide, pgfplots). Bọc mã trong môi trường \\begin{{tikzpicture}} ... \\end{{tikzpicture}}.
     """
     
-    model = genai.GenerativeModel(model_name='gemini-1.5-pro', system_instruction=system_instruction)
+    model = genai.GenerativeModel(model_name='gemini-1.5-pro-latest', system_instruction=system_instruction)
     
     with st.spinner("Hệ thống QTOAN đang xử lý, phân tích mã năng lực và vẽ TikZ... Vui lòng đợi..."):
         content = uploaded_file.getvalue().decode("utf-8") if uploaded_file.name.endswith(".txt") else "Nội dung file Word trích xuất..."
