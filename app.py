@@ -33,14 +33,13 @@ if st.button("Khởi tạo Trọn Bộ (5 Hạng Mục)") and uploaded_file and 
     
     QUY TẮC ĐỊNH DẠNG NGHIÊM NGẶT:
     - {matrix_rule}
-    - Mọi công thức toán học, biểu thức, ký hiệu góc phải được kẹp trong cặp dấu $ ... $ (chuẩn LaTeX inline) để tương thích MathType. Tuyệt đối không dùng \( ... \).
+    - Mọi công thức toán học, biểu thức, ký hiệu góc phải được kẹp trong cặp dấu $ ... $ (chuẩn LaTeX inline) để tương thích MathType. Tuyệt đối không dùng \\( ... \\).
     - Mọi bảng biến thiên, bảng xét dấu, đồ thị hàm số và hình vẽ hình học (phẳng & không gian) BẮT BUỘC phải viết bằng mã TikZ (kết hợp tkz-tab, tkz-euclide, pgfplots). Bọc mã trong môi trường \\begin{{tikzpicture}} ... \\end{{tikzpicture}}.
     """
     
     model = genai.GenerativeModel(model_name='gemini-1.5-flash', system_instruction=system_instruction)
     
     with st.spinner("Hệ thống QTOAN đang xử lý, phân tích mã năng lực và vẽ TikZ... Vui lòng đợi..."):
-        # ĐOẠN ĐÃ ĐƯỢC SỬA LỖI ĐỂ ĐỌC ĐÚNG FILE WORD (.DOCX):
         if uploaded_file.name.endswith(".txt"):
             content = uploaded_file.getvalue().decode("utf-8")
         else:
