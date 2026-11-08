@@ -40,15 +40,21 @@ if st.button("Khởi tạo Trọn Bộ (5 Hạng Mục)") and uploaded_file and 
     model = genai.GenerativeModel(model_name='gemini-1.5-flash', system_instruction=system_instruction)
     
     with st.spinner("Hệ thống QTOAN đang xử lý, phân tích mã năng lực và vẽ TikZ... Vui lòng đợi..."):
-        content = uploaded_file.getvalue().decode("utf-8") if uploaded_file.name.endswith(".txt") else "Nội dung file Word trích xuất..."
+        # ĐOẠN ĐÃ ĐƯỢC SỬA LỖI ĐỂ ĐỌC ĐÚNG FILE WORD (.DOCX):
+        if uploaded_file.name.endswith(".txt"):
+            content = uploaded_file.getvalue().decode("utf-8")
+        else:
+            doc_reader = docx.Document(uploaded_file)
+            content = "\n".join([para.text for para in doc_reader.paragraphs])
+            
         try:
             response = model.generate_content(content)
             st.success("✅ Đã khởi tạo thành công 5 hạng mục!")
             
-            doc = docx.Document()
-            doc.add_paragraph(response.text)
+            doc_out = docx.Document()
+            doc_out.add_paragraph(response.text)
             bio = BytesIO()
-            doc.save(bio)
+            doc_out.save(bio)
             
             st.download_button(
                 label="📥 Tải trọn bộ tài liệu (.docx)",
