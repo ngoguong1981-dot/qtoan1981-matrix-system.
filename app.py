@@ -8,10 +8,18 @@ st.title("Hệ thống Tự động Phân tích Đề & Lập Ma Trận Toán H�
 
 with st.sidebar:
     st.header("Cấu hình hệ thống")
-    api_key = "AIzaSyCdZiVOLXn9s0S30PkCE_CYS45PLV28F6s"
+    
+    # ⚠️ Đã sửa: Lấy API Key an toàn từ Streamlit Secrets để tránh lỗi 403 Leaked Key
+    try:
+        api_key = st.secrets["GEMINI_API_KEY"]
+    except KeyError:
+        api_key = ""
+        st.error("Chưa cấu hình GEMINI_API_KEY trong mục Secrets của Streamlit Cloud.")
+
     khoi_lop = st.radio("Chọn khối lớp:", ["Khối 6, 7, 8, 9, 10, 11", "Khối 12"])
     st.markdown("---")
     st.info("Định dạng bắt buộc:\n- Công thức: `$ ... $`\n- Hình vẽ: `TikZ`")
+    st.markdown("**Bản quyền:** thầy Quang Toàn-dạy toán-0387997970")
 
 uploaded_file = st.file_uploader("Đưa đề thi gốc vào đây (định dạng .txt hoặc Word)", type=["txt", "docx"])
 
@@ -33,14 +41,14 @@ if st.button("Khởi tạo Trọn Bộ (5 Hạng Mục)") and uploaded_file and 
     
     QUY TẮC ĐỊNH DẠNG NGHIÊM NGẶT:
     - {matrix_rule}
-    - Mọi công thức toán học, biểu thức, ký hiệu góc phải được kẹp trong cặp dấu $ ... $ (chuẩn LaTeX inline) để tương thích MathType. Tuyệt đối không dùng \( ... \).
+    - Mọi công thức toán học, biểu thức, ký hiệu góc phải được kẹp trong cặp dấu $ ... $ (chuẩn LaTeX inline) để tương thích MathType. Tuyệt đối không dùng \\( ... \\).
     - Mọi bảng biến thiên, bảng xét dấu, đồ thị hàm số và hình vẽ hình học (phẳng & không gian) BẮT BUỘC phải viết bằng mã TikZ (kết hợp tkz-tab, tkz-euclide, pgfplots). Bọc mã trong môi trường \\begin{{tikzpicture}} ... \\end{{tikzpicture}}.
     """
     
-    model = genai.GenerativeModel(model_name='gemini-1.5-pro', system_instruction=system_instruction)
+    # ⚠️ Đã sửa: Thêm hậu tố -latest để tránh lỗi 404 API Not Found
+    model = genai.GenerativeModel(model_name='gemini-1.5-pro-latest', system_instruction=system_instruction)
     
     with st.spinner("Hệ thống QTOAN đang xử lý, phân tích mã năng lực và vẽ TikZ... Vui lòng đợi..."):
-        # ĐOẠN ĐÃ ĐƯỢC SỬA LỖI ĐỂ ĐỌC ĐÚNG FILE WORD (.DOCX):
         if uploaded_file.name.endswith(".txt"):
             content = uploaded_file.getvalue().decode("utf-8")
         else:
