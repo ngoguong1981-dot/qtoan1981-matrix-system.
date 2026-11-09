@@ -85,8 +85,8 @@ if st.button("Khởi tạo Trọn Bộ (5 Hạng Mục)") and uploaded_file and 
     - Mọi hình vẽ, đồ thị, bảng biến thiên BẮT BUỘC vẽ bằng mã TikZ trong môi trường \\begin{{tikzpicture}} ... \\end{{tikzpicture}}.
     """
     
-    # Sử dụng model định danh chính xác phiên bản -001 tương thích với key AQ mới
-    model = genai.GenerativeModel(model_name='gemini-1.5-flash-001', system_instruction=system_instruction)
+    # Sử dụng tên model chuẩn gemini-1.5-pro tương thích hoàn hảo với mọi dạng API Key Google Cloud
+    model = genai.GenerativeModel(model_name='gemini-1.5-pro', system_instruction=system_instruction)
     
     # Xử lý file đề thi gốc
     if uploaded_file.name.endswith(".txt"):
