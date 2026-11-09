@@ -1,3 +1,5 @@
+import pandas as pd
+import io
 import streamlit as st
 import google.generativeai as genai
 import docx
