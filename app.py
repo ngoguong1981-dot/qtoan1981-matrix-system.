@@ -1,24 +1,63 @@
 import pandas as pd
-import io
 import streamlit as st
 import google.generativeai as genai
 import docx
 from io import BytesIO
 
+# Cấu hình trang
 st.set_page_config(page_title="Hệ thống Ma trận & Đề thi - QTOAN Tools", layout="wide")
 st.title("Hệ thống Tự động Phân tích Đề & Lập Ma Trận Toán Học")
+
+# Hàm xử lý file Excel Ma Trận
+def process_matrix_excel(uploaded_file):
+    try:
+        excel_file = pd.ExcelFile(uploaded_file)
+        matrix_text = "CẤU TRÚC MA TRẬN VÀ ĐẶC TẢ TỪ FILE EXCEL:\n\n"
+        for sheet_name in excel_file.sheet_names:
+            df = pd.read_excel(uploaded_file, sheet_name=sheet_name)
+            df = df.dropna(how='all').dropna(axis=1, how='all')
+            df = df.ffill(axis=0) # Điền ô gộp
+            matrix_text += f"--- Sheet: {sheet_name} ---\n"
+            matrix_text += df.to_markdown(index=False) + "\n\n"
+        return matrix_text
+    except Exception as e:
+        return f"Lỗi đọc Excel: {str(e)}"
+
+# Hàm đọc file Word (hỗ trợ đọc cả bảng biểu)
+def read_word_file(file):
+    doc = docx.Document(file)
+    content = []
+    for para in doc.paragraphs:
+        if para.text.strip():
+            content.append(para.text)
+    for table in doc.tables:
+        for row in table.rows:
+            row_data = [cell.text.strip() for cell in row.cells if cell.text.strip()]
+            if row_data:
+                content.append(" | ".join(row_data))
+    return "\n".join(content)
 
 with st.sidebar:
     st.header("Cấu hình hệ thống")
     
-    # ⚠️ Đã sửa: Lấy API Key an toàn từ Streamlit Secrets để tránh lỗi 403 Leaked Key
+    # Bảo mật API Key qua st.secrets, chặn rò rỉ mã nguồn trên GitHub
     try:
-        api_key ="AIzaSyCdZiVOLXn9s0S30PkCE_CYS45PLV28F6s"
-    except KeyError:
-        api_key = ""
-        st.error("Chưa cấu hình GEMINI_API_KEY trong mục Secrets của Streamlit Cloud.")
+        api_key = st.secrets["GEMINI_API_KEY"]
+    except Exception:
+        api_key = st.text_input("Nhập API Key:", type="password")
+        if not api_key:
+            st.error("Chưa cấu hình GEMINI_API_KEY.")
 
-    khoi_lop = st.radio("Chọn khối lớp:", ["Khối 6, 7, 8, 9, 10, 11", "Khối 12"])
+    khoi_lop = st.radio("Chọn khối lớp:", ["Khối 6-11", "Khối 12"])
+    st.markdown("---")
+    
+    st.subheader("Cấu hình Ma trận")
+    matrix_file = st.file_uploader("Tải lên cấu trúc (Excel .xlsx)", type=["xlsx"])
+    matrix_context = ""
+    if matrix_file is not None:
+        matrix_context = process_matrix_excel(matrix_file)
+        st.success("Đã nạp cấu trúc Ma trận!")
+
     st.markdown("---")
     st.info("Định dạng bắt buộc:\n- Công thức: `$ ... $`\n- Hình vẽ: `TikZ`")
     st.markdown("**Bản quyền:** thầy Quang Toàn-dạy toán-0387997970")
@@ -31,41 +70,50 @@ if st.button("Khởi tạo Trọn Bộ (5 Hạng Mục)") and uploaded_file and 
     if khoi_lop == "Khối 12":
         matrix_rule = "Áp dụng cấu trúc Ma trận khung và Đặc tả 14 cột chuẩn môn Toán 12 (TNKQ 4 phương án, TN Đúng/Sai, TN Trả lời ngắn)."
     else:
-        matrix_rule = "Áp dụng cấu trúc Ma trận khung và Đặc tả 15 cột chuẩn môn Toán 11 (TNKQ 4 phương án, TN Đúng/Sai, Tự luận/Trả lời ngắn)."
+        matrix_rule = "Áp dụng cấu trúc Ma trận khung và Đặc tả 15 cột chuẩn môn Toán (TNKQ 4 phương án, TN Đúng/Sai, Tự luận/Trả lời ngắn)."
         
     system_instruction = f"""
-    Bạn là chuyên gia sư phạm Toán học. Hãy đọc đề thi được cung cấp và trích xuất trọn bộ 5 hạng mục sau:
+    Bạn là chuyên gia sư phạm Toán học. Hãy đọc đề thi được cung cấp và trích xuất trọn bộ 5 hạng mục:
     1. Ma trận khung.
     2. Bản đặc tả chi tiết.
-    3. Đề thi hoàn chỉnh đã gán mã năng lực và mức độ (Ví dụ: Nhận biết - TD1.1) vào đầu mỗi câu/mỗi ý a,b,c,d.
+    3. Đề thi hoàn chỉnh đã gán mã năng lực và mức độ (Ví dụ: Nhận biết - TD1.1).
     4. Bảng đáp án chi tiết.
     5. Lời giải chi tiết.
     
-    QUY TẮC ĐỊNH DẠNG NGHIÊM NGẶT:
+    {matrix_context}
+    
+    QUY TẮC ĐỊNH DẠNG:
     - {matrix_rule}
-    - Mọi công thức toán học, biểu thức, ký hiệu góc phải được kẹp trong cặp dấu $ ... $ (chuẩn LaTeX inline) để tương thích MathType. Tuyệt đối không dùng \\( ... \\).
-    - Mọi bảng biến thiên, bảng xét dấu, đồ thị hàm số và hình vẽ hình học (phẳng & không gian) BẮT BUỘC phải viết bằng mã TikZ (kết hợp tkz-tab, tkz-euclide, pgfplots). Bọc mã trong môi trường \\begin{{tikzpicture}} ... \\end{{tikzpicture}}.
+    - Mọi công thức toán học phải bọc trong $ ... $. Tuyệt đối không dùng \( ... \).
+    - Mọi hình vẽ, đồ thị, bảng biến thiên BẮT BUỘC vẽ bằng mã TikZ trong môi trường \\begin{{tikzpicture}} ... \\end{{tikzpicture}}.
     """
     
-    # ⚠️ Đã sửa: Thêm hậu tố -latest để tránh lỗi 404 API Not Found
-    model = genai.GenerativeModel(model_name='gemini-1.5-pro-latest', system_instruction=system_instruction)
+    model = genai.GenerativeModel(model_name='gemini-1.5-pro', system_instruction=system_instruction)
     
-    with st.spinner("Hệ thống QTOAN đang xử lý, phân tích mã năng lực và vẽ TikZ... Vui lòng đợi..."):
-        if uploaded_file.name.endswith(".txt"):
-            content = uploaded_file.getvalue().decode("utf-8")
-        else:
-            doc_reader = docx.Document(uploaded_file)
-            content = "\n".join([para.text for para in doc_reader.paragraphs])
-            
+    # Xử lý file đề thi gốc
+    if uploaded_file.name.endswith(".txt"):
+        exam_content = uploaded_file.getvalue().decode("utf-8")
+    else:
+        exam_content = read_word_file(uploaded_file)
+        
+    # Tạo hiệu ứng streaming text cho UX mượt mà
+    response_placeholder = st.empty()
+    full_response = ""
+    
+    with st.spinner("Hệ thống QTOAN đang xử lý, phân tích mã năng lực và vẽ TikZ..."):
         try:
-            response = model.generate_content(content)
-            st.success("✅ Đã khởi tạo thành công 5 hạng mục!")
+            response = model.generate_content(exam_content, stream=True)
+            for chunk in response:
+                full_response += chunk.text
+                response_placeholder.markdown(full_response + "▌")
+            response_placeholder.markdown(full_response)
             
             doc_out = docx.Document()
-            doc_out.add_paragraph(response.text)
+            doc_out.add_paragraph(full_response)
             bio = BytesIO()
             doc_out.save(bio)
             
+            st.success("✅ Đã khởi tạo thành công 5 hạng mục!")
             st.download_button(
                 label="📥 Tải trọn bộ tài liệu (.docx)",
                 data=bio.getvalue(),
@@ -73,4 +121,4 @@ if st.button("Khởi tạo Trọn Bộ (5 Hạng Mục)") and uploaded_file and 
                 mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             )
         except Exception as e:
-            st.error(f"Lỗi khi kết nối API: {e}")
+            st.error(f"Lỗi hệ thống: {e}")
